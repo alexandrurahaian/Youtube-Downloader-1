@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Youtube_Downloader</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>yt_downloader.ico</ApplicationIcon>
+    <PackageProjectUrl>https://github.com/vortex3225/Youtube-Downloader</PackageProjectUrl>
+    <PackageIcon>yt_downloader128.ico</PackageIcon>
+    <RepositoryUrl>https://github.com/vortex3225/Youtube-Downloader</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>youtube downloader</PackageTags>
+    <PackageReleaseNotes>First release</PackageReleaseNotes>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\moon.png" />
+    <None Remove="Assets\sun.png" />
+    <None Remove="yt-dlp.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="yt_downloader.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\yt_downloader128.ico">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\moon.png" />
+    <Resource Include="Assets\sun.png" />
+    <Resource Include="yt-dlp.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>
