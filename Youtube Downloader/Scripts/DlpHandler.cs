@@ -19,6 +19,7 @@ namespace Youtube_Downloader.Scripts
         private static readonly string FFmpegPath = Path.Combine(AppContext.BaseDirectory, "FFmpeg");
         public static Video video_page;
         public static Playlist playlist_page;
+        private static bool IsPlaylist = false;
         public static (bool, string?, StreamReader?) StartDlpProcess(string[] arguments, bool is_playlist = false)
         {
             if (currentDLP_Process != null) return (false, "A yt-dlp process is already running!", null);
@@ -36,9 +37,11 @@ namespace Youtube_Downloader.Scripts
                 dlp_proc.StartInfo.RedirectStandardError = true;
                 dlp_proc.StartInfo.UseShellExecute = false;
                 dlp_proc.StartInfo.CreateNoWindow = true;
+                IsPlaylist = is_playlist;
 
                 dlp_proc.OutputDataReceived += (sender, e) =>
                 {
+                    Debug.WriteLine($"Data: {e.Data}");
                     if (!string.IsNullOrEmpty(e.Data))
                     {
                         string data = e.Data;
@@ -50,7 +53,7 @@ namespace Youtube_Downloader.Scripts
                             else playlist_page.UpdateProgress = true;
 
                             var match = Regex.Match(data,
-                                    @"\[download\]\s+([\d.]+)%.*~\s+([\d.]+\w+).*at\s+([\d.]+\w+/s).*ETA\s+(\S+)\s+\(frag\s+(\d+)/(\d+)\)");
+                                @"\[download\]\s+([\d.]+)%.*?of\s+([\d.]+\w+).*?at\s+([\w./]+).*?ETA\s+([\w:]+)");
 
                             if (match.Success)
                             {
@@ -58,11 +61,27 @@ namespace Youtube_Downloader.Scripts
                                 string size = match.Groups[2].Value;
                                 string speed = match.Groups[3].Value;
                                 string eta = match.Groups[4].Value;
-                                int currentFragment = int.Parse(match.Groups[5].Value);
-                                int totalFragments = int.Parse(match.Groups[6].Value);
-
-                                if (!is_playlist) video_page.DisplayProgress(progress, size, speed, eta, currentFragment, totalFragments);
-                                else playlist_page.DisplayProgress(progress, size, speed, eta, currentFragment, totalFragments);
+                                //int currentFragment = int.Parse(match.Groups[5].Value);
+                                //int totalFragments = int.Parse(match.Groups[6].Value);
+                                Debug.WriteLine("Sucess");
+                                if (!is_playlist)
+                                {
+                                    video_page.Dispatcher.Invoke(() =>
+                                    {
+                                        video_page.UpdateProgress = true;
+                                        video_page.DisplayProgress(progress, size, speed, eta, 1, 1);
+                                    });
+                                    Debug.WriteLine("Fired display progress on video");
+                                }
+                                else
+                                {
+                                    playlist_page.Dispatcher.Invoke(() =>
+                                    {
+                                        playlist_page.UpdateProgress = true;
+                                        playlist_page.DisplayProgress(progress, size, speed, eta, 1, 1);
+                                    });
+                                    Debug.WriteLine("Fired display progress on playlist");
+                                }
                             }
                         }
                         else if (data.Contains("has already been downloaded"))
@@ -93,8 +112,9 @@ namespace Youtube_Downloader.Scripts
                         else if (data.StartsWith("[download]"))
                         {
                             if (!is_playlist)
-                                video_page.UpdateProgress = !video_page.UpdateProgress;
-                            else playlist_page.UpdateProgress = !playlist_page.UpdateProgress;
+                                video_page.UpdateProgress = true;
+                            else
+                                playlist_page.UpdateProgress = true;
                         }
                     }
                 };
@@ -117,7 +137,6 @@ namespace Youtube_Downloader.Scripts
                 dlp_proc.Start();
                 dlp_proc.BeginOutputReadLine();
                 dlp_proc.BeginErrorReadLine();
-                dlp_proc.Exited += Dlp_proc_Exited;
 
                 currentDLP_Process = dlp_proc;
                 return (true, null, dlp_proc.StandardOutput);
@@ -131,6 +150,26 @@ namespace Youtube_Downloader.Scripts
         private static void Dlp_proc_Exited(object? sender, EventArgs e)
         {
             currentDLP_Process = null;
+            if (IsPlaylist)
+            {
+                playlist_page.Dispatcher.Invoke(() =>
+                {
+                    playlist_page.UpdateProgress = false;
+                    playlist_page.progress_panel.Visibility = Visibility.Collapsed;
+                    playlist_page.download_finish_panel.Visibility = Visibility.Visible;
+                    playlist_page.download_btn.IsEnabled = true;
+                });
+            }
+            else
+            {
+                video_page.Dispatcher.Invoke(() =>
+                {
+                    video_page.UpdateProgress = false;
+                    video_page.progress_panel.Visibility = Visibility.Collapsed;
+                    video_page.download_finish_panel.Visibility = Visibility.Visible;
+                    video_page.download_btn.IsEnabled = true;
+                });
+            }
         }
 
         public static (bool, string?) KillDlpProcess()

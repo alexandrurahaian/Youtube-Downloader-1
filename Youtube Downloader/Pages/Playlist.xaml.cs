@@ -84,12 +84,14 @@ namespace Youtube_Downloader.Pages
                 });
                 return;
             }
+            Debug.WriteLine("In progress");
             progress_panel.Dispatcher.Invoke(() =>
             {
                 progress_panel.Visibility = Visibility.Visible;
                 download_progress_bar.Value = percent;
                 progress_details_display.Text = $"Downloading... {percent}% ~ {size} @ {speed} | {eta} left | fragment {currentFragment} of {totalFragments}";
                 download_btn.IsEnabled = false;
+                Debug.WriteLine("Set display");
             });
             if (currentFragment >= totalFragments || show_success == true)
             {
