@@ -14,8 +14,8 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>youtube downloader</PackageTags>
     <PackageReleaseNotes>First release</PackageReleaseNotes>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>1.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
