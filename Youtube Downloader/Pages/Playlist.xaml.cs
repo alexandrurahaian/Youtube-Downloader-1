@@ -84,39 +84,15 @@ namespace Youtube_Downloader.Pages
                 });
                 return;
             }
+            Debug.WriteLine("In progress");
             progress_panel.Dispatcher.Invoke(() =>
             {
                 progress_panel.Visibility = Visibility.Visible;
                 download_progress_bar.Value = percent;
                 progress_details_display.Text = $"Downloading... {percent}% ~ {size} @ {speed} | {eta} left | fragment {currentFragment} of {totalFragments}";
                 download_btn.IsEnabled = false;
+                Debug.WriteLine("Set display");
             });
-            if (currentFragment >= totalFragments || show_success == true)
-            {
-                downloaded++;
-                if (downloaded < GetSelectedVideos().Count)
-                {
-                    Debug.WriteLine($"Downloaded: {downloaded}");
-                    Debug.WriteLine($"Selected: {GetSelectedVideos().Count}");
-                    progress_details_display.Dispatcher.Invoke(() =>
-                    {
-                        progress_details_display.Text = "Starting next download...";
-                        download_progress_bar.Value = 0;
-                    });
-                }
-
-                if (downloaded >= GetSelectedVideos().Count || show_success == true)
-                {
-                    UpdateProgress = false;
-                    downloaded = 0;
-                    progress_panel.Dispatcher.Invoke(() =>
-                    {
-                        progress_panel.Visibility = Visibility.Collapsed;
-                        download_finish_panel.Visibility = Visibility.Visible;
-                        download_btn.IsEnabled = true;
-                    });
-                }
-            }
         }
 
         private void download_btn_Click(object sender, RoutedEventArgs e)
